@@ -6,18 +6,11 @@ from PyQt6.QtCore import QSize, Qt
 from PyQt6.QtGui import QPen, QColor, QBrush
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
+import numpy as np
 import random
-from algo import RANGE, ITERATIONS
+from algo import RANGE, ITERATIONS, get_plot
 
 COLOR_MAP = 'cool'
-
-class Canvas(FigureCanvasQTAgg):
-    def __init__(self, parent=None, width=5, height=4, dpi=100):
-        fig = Figure(figsize=(width, height), dpi=dpi)
-        self.st_plot = fig.add_subplot()
-        ax = [i for i in range(-RANGE, RANGE)]
-        self.st_plot.contourf(ax, ax, [ax for k in range(2*RANGE)], cmap=COLOR_MAP)
-        super(Canvas, self).__init__(fig)
 
 class Main_Window(QMainWindow):
     def __init__(self):
@@ -26,17 +19,20 @@ class Main_Window(QMainWindow):
     
     def initialize(self):
         self.setWindowTitle('Градиентный спуск')
-        self.setFixedSize(QSize(600, 350))
+        self.setFixedSize(QSize(600, 400))
         self.setWindowIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_DialogResetButton))
 
-        self.graphwidget = Canvas(self, width=5, height=4, dpi=100)
+        self.figure = Figure(figsize=(12, 6), dpi=100)
+        st_plot = self.figure.add_subplot()
+        ax = [i for i in range(-RANGE, RANGE)]
+        st_plot.contourf(ax, ax, [ax for k in range(2*RANGE)], cmap=COLOR_MAP)
+        self.canvas = FigureCanvasQTAgg(self.figure)
         self.iterations_label = QLabel('Количество итераций:')
         self.iterations_input = QLineEdit()
         self.iterations_input.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.iterations_input.setReadOnly(True)
         self.iterations_input.setText(str(ITERATIONS))
         self.range_label = QLabel('Диапазон значений x,y:')
-        # self.range_label.setStyleSheet('margin-right: 10px')
         self.range_begin_input = QLineEdit()
         self.range_end_input = QLineEdit()
         self.range_begin_input.setMaximumWidth(25)
@@ -70,9 +66,9 @@ class Main_Window(QMainWindow):
         self.second_func_radio_button = QRadioButton()
         self.third_func_radio_button = QRadioButton()
 
-        self.func_radio_buttons.addButton(self.first_func_radio_button)
-        self.func_radio_buttons.addButton(self.second_func_radio_button)
-        self.func_radio_buttons.addButton(self.third_func_radio_button)
+        self.func_radio_buttons.addButton(self.first_func_radio_button, 1)
+        self.func_radio_buttons.addButton(self.second_func_radio_button, 2)
+        self.func_radio_buttons.addButton(self.third_func_radio_button, 3)
 
         self.range_layout = QHBoxLayout()
         self.range_layout.addWidget(self.range_label)
@@ -116,7 +112,7 @@ class Main_Window(QMainWindow):
         self.build_button_layout.addWidget(self.plot_button)
 
         self.plot_layout = QHBoxLayout()
-        self.plot_layout.addWidget(self.graphwidget)
+        self.plot_layout.addWidget(self.canvas)
 
         self.data_layout = QVBoxLayout()
         self.data_layout.addLayout(self.const_data_layout)
@@ -142,11 +138,16 @@ class Main_Window(QMainWindow):
         self.point_y_input.setCursorPosition(0)
     
     def build_plot_button_clicked(self):
-        pass
+        if self.point_x_input.text() and self.point_y_input.text() and self.func_radio_buttons.checkedButton():
+            point = [float(self.point_x_input.text()), float(self.point_y_input.text())]
+            plot = get_plot(self.func_radio_buttons.checkedId(), point)
+            self.figure.clf()
+            st_plot = self.figure.add_subplot()
+            st_plot.contourf(plot['x_range'], plot['y_range'], plot['func_values'], cmap=COLOR_MAP)
+            st_plot.scatter(point[0], point[1], c = 'red', marker = '.', s=175)
+            st_plot.scatter(plot['mp'][0], plot['mp'][1], c = 'red', marker = '.', s=175)
+            st_plot.plot([point[0][0] for point in plot['line']], [point[0][1] for point in plot['line']], c='red', linestyle='dashed')
+            self.canvas.draw_idle()
+            
 
-# ax1.contourf(x, y, f, cmap=COLOR_MAP)
-# ax1.set_xlabel('x', fontsize = 15)
-# ax1.set_ylabel('y', fontsize = 15)
-# ax1.scatter(point[0], point[1], c = 'red', marker = '.', s=175)
-# ax1.scatter(movin_point[0], movin_point[1], c = 'red', marker = '.', s=175)
-# ax1.plot([point[0][0] for point in line], [point[0][1] for point in line], c='red', linestyle='dashed')
+
