@@ -148,6 +148,7 @@ class Main_Window(QMainWindow):
             st_plot.scatter(plot['mp'][0], plot['mp'][1], c = 'red', marker = '.', s=175)
             st_plot.plot([point[0][0] for point in plot['line']], [point[0][1] for point in plot['line']], c='red', linestyle='dashed')
             self.canvas.draw_idle()
+            print(plot['mp'], plot['res'])
             
 
 

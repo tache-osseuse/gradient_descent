@@ -48,7 +48,7 @@ def get_plot(function_id: int, point: list):
         par_y = derivative_func_in_y.subs({x_s:movin_point[0], y_s:movin_point[1]})
         if -RANGE <= movin_point[0] + STEP*par_x.evalf() <= RANGE: movin_point[0] += STEP*par_x.evalf()
         if -RANGE <= movin_point[1] + STEP*par_y.evalf() <= RANGE: movin_point[1] += STEP*par_y.evalf()
-    return {'x_range': x, 'y_range': y, 'func_values': func, 'line': line, 'mp': movin_point}
+    return {'x_range': x, 'y_range': y, 'func_values': func, 'line': line, 'mp': movin_point, 'res': res}
 
 
 
