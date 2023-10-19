@@ -5,6 +5,8 @@ import sympy as sym
 
 COFS = [0.123901, -1.21434e-17, -0.03561956,
                 -0.01106, -0.01485585, 2.74986e-18, 0.004058974, -3.4e-18]
+SEC_COFS = [1.585882, -0.08483, -0.12909, -0.23332,
+            -0.24763, 0.006746, 0.011697, 0.017069]
 RANGE = 3
 ACCURACY = 1.e-7
 
@@ -15,7 +17,7 @@ def second_function(x: np.ndarray, y: np.ndarray):
     return np.cos(x) + np.sin(np.cos(y)*x)
 
 def third_function(x: np.ndarray, y: np.ndarray):
-    return x**2 - y**2
+    return SEC_COFS[0] + SEC_COFS[1]*x + SEC_COFS[2]*y + SEC_COFS[3]*x**2 + SEC_COFS[4]*y**2 + SEC_COFS[5]*x**3 + SEC_COFS[6]*y**3 + SEC_COFS[7]*x*y
 
 def get_plot(function_id: int, point: list):
     x_s, y_s = sym.symbols('x y')
@@ -29,7 +31,7 @@ def get_plot(function_id: int, point: list):
             samp_func = sym.cos(x_s) + sym.sin(sym.cos(y_s)*x_s)
         case 3:
             func = third_function(x, y)
-            samp_func = x_s**2 - y_s**2
+            samp_func = SEC_COFS[0] + SEC_COFS[1]*x_s + SEC_COFS[2]*y_s + SEC_COFS[3]*x_s**2 + SEC_COFS[4]*y_s**2 + SEC_COFS[5]*x_s**3 + SEC_COFS[6]*y_s**3 + SEC_COFS[7]*x_s*y_s
     derivative_func_in_x = samp_func.diff(x_s)
     derivative_func_in_y = samp_func.diff(y_s)
     line = []
