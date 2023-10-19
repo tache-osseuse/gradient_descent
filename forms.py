@@ -8,7 +8,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 import numpy as np
 import random
-from algo import RANGE, ITERATIONS, get_plot
+from algo import RANGE, get_plot, ACCURACY
 
 COLOR_MAP = 'cool'
 
@@ -31,7 +31,17 @@ class Main_Window(QMainWindow):
         self.iterations_input = QLineEdit()
         self.iterations_input.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.iterations_input.setReadOnly(True)
-        self.iterations_input.setText(str(ITERATIONS))
+        self.iterations_input.setMaximumWidth(50)
+        self.func_max_label = QLabel('Максимум функции:')
+        self.func_max_input = QLineEdit()
+        self.func_max_input.setReadOnly(True)
+        self.func_max_point_label = QLabel('Точка максимума x,y:')
+        self.func_max_point_x_input = QLineEdit()
+        self.func_max_point_x_input.setMaximumWidth(45)
+        self.func_max_point_x_input.setReadOnly(True)
+        self.func_max_point_y_input = QLineEdit()
+        self.func_max_point_y_input.setMaximumWidth(45)
+        self.func_max_point_y_input.setReadOnly(True)
         self.range_label = QLabel('Диапазон значений x,y:')
         self.range_begin_input = QLineEdit()
         self.range_end_input = QLineEdit()
@@ -41,8 +51,12 @@ class Main_Window(QMainWindow):
         self.range_end_input.setReadOnly(True)
         self.range_begin_input.setText(str(-RANGE))
         self.range_end_input.setText(str(RANGE))
-        self.range_begin_input.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.range_end_input.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.accuracy_label = QLabel('Точность:')
+        self.accuracy_input = QLineEdit()
+        self.accuracy_input.setText(str(ACCURACY))
+        self.accuracy_input.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.accuracy_input.setMaximumWidth(45)
+        self.accuracy_input.setReadOnly(True)
         self.plot_button = QPushButton('Построение')
         self.plot_button.clicked.connect(self.build_plot_button_clicked)
         self.first_func_label = QLabel('Полином')
@@ -75,14 +89,14 @@ class Main_Window(QMainWindow):
         self.range_layout.addWidget(self.range_begin_input, alignment=Qt.AlignmentFlag.AlignLeft)
         self.range_layout.addWidget(self.range_end_input, alignment=Qt.AlignmentFlag.AlignLeft)
 
-        self.iterations_layout = QHBoxLayout()
-        self.iterations_layout.addWidget(self.iterations_label)
-        self.iterations_layout.addWidget(self.iterations_input)
+        self.accuracy_layout = QHBoxLayout()
+        self.accuracy_layout.addWidget(self.accuracy_label)
+        self.accuracy_layout.addWidget(self.accuracy_input)
 
         self.const_data_layout = QVBoxLayout()
         self.const_data_layout.addLayout(self.range_layout)
-        self.const_data_layout.addLayout(self.iterations_layout)
-
+        self.const_data_layout.addLayout(self.accuracy_layout)
+        
         self.point_layout = QHBoxLayout()
         self.point_layout.addWidget(self.point_x_label)
         self.point_layout.addWidget(self.point_x_input)
@@ -111,6 +125,24 @@ class Main_Window(QMainWindow):
         self.build_button_layout = QHBoxLayout()
         self.build_button_layout.addWidget(self.plot_button)
 
+        self.iterations_layout = QHBoxLayout()
+        self.iterations_layout.addWidget(self.iterations_label)
+        self.iterations_layout.addWidget(self.iterations_input)
+
+        self.func_max_layout = QHBoxLayout()
+        self.func_max_layout.addWidget(self.func_max_label)
+        self.func_max_layout.addWidget(self.func_max_input)
+
+        self.func_max_point_layout = QHBoxLayout()
+        self.func_max_point_layout.addWidget(self.func_max_point_label)
+        self.func_max_point_layout.addWidget(self.func_max_point_x_input)
+        self.func_max_point_layout.addWidget(self.func_max_point_y_input)
+
+        self.result_layout = QVBoxLayout()
+        self.result_layout.addLayout(self.iterations_layout)
+        self.result_layout.addLayout(self.func_max_layout)
+        self.result_layout.addLayout(self.func_max_point_layout)
+
         self.plot_layout = QHBoxLayout()
         self.plot_layout.addWidget(self.canvas)
 
@@ -119,6 +151,7 @@ class Main_Window(QMainWindow):
         self.data_layout.addLayout(self.point_layout)
         self.data_layout.addLayout(self.radio_buttons_layout)
         self.data_layout.addLayout(self.build_button_layout)
+        self.data_layout.addLayout(self.result_layout)
         self.data_layout.addStretch()
 
         self.main_layout = QHBoxLayout()
@@ -145,10 +178,17 @@ class Main_Window(QMainWindow):
             st_plot = self.figure.add_subplot()
             st_plot.contourf(plot['x_range'], plot['y_range'], plot['func_values'], cmap=COLOR_MAP)
             st_plot.scatter(point[0], point[1], c = 'red', marker = '.', s=175)
+            st_plot.text(point[0]+0.2, point[1], 'Начальная точка', size=9)
             st_plot.scatter(plot['mp'][0], plot['mp'][1], c = 'red', marker = '.', s=175)
+            st_plot.text(plot['mp'][0]+0.2, plot['mp'][1], 'Точка маскимума', size=9)
             st_plot.plot([point[0][0] for point in plot['line']], [point[0][1] for point in plot['line']], c='red', linestyle='dashed')
             self.canvas.draw_idle()
+            self.iterations_input.setText(str(plot['counter']))
+            self.func_max_input.setText(str(plot['res']))
+            self.func_max_input.setCursorPosition(0)
+            self.func_max_point_x_input.setText(str(plot['mp'][0]))
+            self.func_max_point_y_input.setText(str(plot['mp'][1]))
+            self.func_max_point_x_input.setCursorPosition(0)
+            self.func_max_point_y_input.setCursorPosition(0)
             print(plot['mp'], plot['res'])
-            
-
-
+            print(f'Кол-во итераций: {plot["counter"]}')

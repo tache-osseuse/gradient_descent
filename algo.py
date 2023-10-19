@@ -3,11 +3,10 @@ import numpy as np
 import random
 import sympy as sym
 
-COFS = [-0.00673, 0.852442154, 0.86223302,
-                0, 0.00050127,-0.08829, -0.093122603, -0.0038]
-RANGE = 20
-ITERATIONS = 1000
-STEP = 0.001
+COFS = [0.123901, -1.21434e-17, -0.03561956,
+                -0.01106, -0.01485585, 2.74986e-18, 0.004058974, -3.4e-18]
+RANGE = 3
+ACCURACY = 1.e-7
 
 def first_function(x: np.ndarray, y: np.ndarray):
     return COFS[0] + COFS[1]*x + COFS[2]*y + COFS[3]*x**2 + COFS[4]*y**2 + COFS[5]*x**3 + COFS[6]*y**3 + COFS[7]*x*y
@@ -35,7 +34,10 @@ def get_plot(function_id: int, point: list):
     derivative_func_in_y = samp_func.diff(y_s)
     line = []
     movin_point = point[:]
-    for _ in range(ITERATIONS):
+    counter = 0
+    prev_res = None
+    while True:
+        counter += 1
         match function_id:
             case 1:
                 res = first_function(movin_point[0], movin_point[1])
@@ -46,9 +48,21 @@ def get_plot(function_id: int, point: list):
         line.append([movin_point[:], res])
         par_x = derivative_func_in_x.subs({x_s:movin_point[0], y_s:movin_point[1]})
         par_y = derivative_func_in_y.subs({x_s:movin_point[0], y_s:movin_point[1]})
-        if -RANGE <= movin_point[0] + STEP*par_x.evalf() <= RANGE: movin_point[0] += STEP*par_x.evalf()
-        if -RANGE <= movin_point[1] + STEP*par_y.evalf() <= RANGE: movin_point[1] += STEP*par_y.evalf()
-    return {'x_range': x, 'y_range': y, 'func_values': func, 'line': line, 'mp': movin_point, 'res': res}
+        print(movin_point)
+        if -RANGE <= movin_point[0] + par_x.evalf() <= RANGE: 
+            movin_point[0] += par_x.evalf()
+        if -RANGE <= movin_point[1] + par_y.evalf() <= RANGE: 
+            movin_point[1] += par_y.evalf()
+        if prev_res == None:
+            prev_res = res
+        else:
+            if res - prev_res < ACCURACY:
+                break
+            else:
+                prev_res = res
+    print(f'func = {res}, prev_func = {prev_res}')
+    return {'x_range': x, 'y_range': y, 'func_values': func, 'line': line, 
+            'mp': movin_point, 'res': res, 'counter': counter}
 
 
 
