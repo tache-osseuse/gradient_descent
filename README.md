@@ -1,7 +1,6 @@
 # Реализация метода градиентного спуска
 
-![мем]( | width=150)
-<img src="https://github.com/tache-osseuse/gradient_descent/assets/71820145/4bea2c99-6b98-443a-a411-857aecf0c1d4" width="100">
+<img src="https://github.com/tache-osseuse/gradient_descent/assets/71820145/4bea2c99-6b98-443a-a411-857aecf0c1d4" width="300">
 
 **Пример работы**
 
